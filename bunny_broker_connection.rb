@@ -1,7 +1,12 @@
 require "bunny"
 
 class BunnyBrokerConnection
-  QUEUE_NAME = "hello"
+  QUEUE_NAME = "task_queue"
+  PREFETCH_LIMIT = 1
+
+  def initialize
+    limit_channel_prefetch(1)
+  end
 
   def connection 
     return @connection if @connection
@@ -15,11 +20,15 @@ class BunnyBrokerConnection
   end
 
   def queue
-    @queue ||= channel.queue(QUEUE_NAME)
+    @queue ||= channel.queue(QUEUE_NAME, durable: true)
   end
 
   def close_connection
     connection.close
     puts "[x] Connection closed"
+  end
+
+  def limit_channel_prefetch(limit)
+    channel.prefetch(limit)
   end
 end
